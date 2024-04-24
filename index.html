@@ -3,16 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Fetching Data...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+    </style>
 </head>
 <body>
     <h1>Data Fetch in Progress...</h1>
-    <div id="data"></div>
+    <div id="data">Please wait, attempting to bypass the browser warning...</div>
     <script>
         // Function to extract the 'token' parameter from the URL query string
         function getParameterByName(name, url = window.location.href) {
             name = name.replace(/[\[\]]/g, '\\$&');
-            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                results = regex.exec(url);
+            const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                  results = regex.exec(url);
             if (!results) return null;
             if (!results[2]) return '';
             return decodeURIComponent(results[2].replace(/\+/g, ' '));
@@ -20,24 +26,28 @@
 
         // Fetch data with the token parameter and custom header
         window.onload = function() {
-            var token = getParameterByName('token');  // Get token from URL
+            const token = getParameterByName('token');  // Get token from URL
             if (token) {
-                var ngrokUrl = "https://smashing-halibut-terminally.ngrok-free.app/protected-area?token=" + token;
+                const ngrokUrl = `https://smashing-halibut-terminally.ngrok-free.app/protected-area?token=${token}`;
                 fetch(ngrokUrl, {
                     method: 'GET',
                     headers: {
                         'ngrok-skip-browser-warning': 'true'  // Set custom header
                     }
                 })
-                .then(response => response.text())  // Convert response to text (or .json() if JSON)
-                .then(data => {
-                    document.getElementById('data').innerHTML = data;  // Display data
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    document.getElementById('data').textContent = 'Bypass successful, redirecting...';
+                    // Redirect after successful bypass and data fetch
+                    window.location.href = ngrokUrl;
                 })
                 .catch(error => {
-                    document.body.innerHTML = `<p>Error fetching data: ${error}</p>`;
+                    document.getElementById('data').textContent = `Error fetching data: ${error.message}`;
                 });
             } else {
-                document.body.innerHTML = '<p>Error: No token provided. Please check the link and try again.</p>';
+                document.getElementById('data').textContent = 'Error: No token provided. Please check the link and try again.';
             }
         };
     </script>
