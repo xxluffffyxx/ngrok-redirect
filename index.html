@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="5;url=https://smashing-halibut-terminally.ngrok-free.app/protected-area">
-    <title>Redirecting...</title>
+    <title>Fetching Data...</title>
+</head>
+<body>
+    <h1>Data Fetch in Progress...</h1>
+    <div id="data"></div>
     <script>
         // Function to extract the 'token' parameter from the URL query string
         function getParameterByName(name, url = window.location.href) {
@@ -15,20 +18,28 @@
             return decodeURIComponent(results[2].replace(/\+/g, ' '));
         }
 
-        // Redirect with the token parameter
+        // Fetch data with the token parameter and custom header
         window.onload = function() {
             var token = getParameterByName('token');  // Get token from URL
             if (token) {
                 var ngrokUrl = "https://smashing-halibut-terminally.ngrok-free.app/protected-area?token=" + token;
-                window.location.href = ngrokUrl;  // Redirect to ngrok with token
+                fetch(ngrokUrl, {
+                    method: 'GET',
+                    headers: {
+                        'ngrok-skip-browser-warning': 'true'  // Set custom header
+                    }
+                })
+                .then(response => response.text())  // Convert response to text (or .json() if JSON)
+                .then(data => {
+                    document.getElementById('data').innerHTML = data;  // Display data
+                })
+                .catch(error => {
+                    document.body.innerHTML = `<p>Error fetching data: ${error}</p>`;
+                });
             } else {
                 document.body.innerHTML = '<p>Error: No token provided. Please check the link and try again.</p>';
             }
         };
     </script>
-</head>
-<body>
-    <h1>Redirecting...</h1>
-    <p>If you are not redirected, please click <a href="#" onclick="window.onload()">this link</a>.</p>
 </body>
 </html>
